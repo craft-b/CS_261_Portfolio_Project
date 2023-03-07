@@ -109,6 +109,7 @@ class MinHeap:
         """
         while (i * 2) < self.heap.length():
             mc = self.min_child(i)
+           
             if self.heap[i] > self.heap[mc]:
                 self.heap[i], self.heap[mc] = self.heap[mc], self.heap[i]
             i = mc
@@ -120,6 +121,7 @@ class MinHeap:
         """
         left_child = i * 2 + 1
         right_child = i * 2 + 2
+        
         if right_child >= self.heap.length():
             return left_child
         return left_child if self.heap[left_child] <= \
