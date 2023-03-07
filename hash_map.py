@@ -55,7 +55,6 @@ class HashMap:
             out += str(i) + ': ' + str(list) + '\n'
         return out
         
-
     def clear(self) -> None:
         """
         Clears Hash Table without changing underlying capacity
@@ -65,7 +64,6 @@ class HashMap:
             bucket.size = 0
         self.size = 0
         
-
     def get(self, key: str) -> object:
         """
         Returns value associated with given key;
@@ -78,7 +76,6 @@ class HashMap:
             if node.key == key:
                 return node.value
         return None
-
 
     def put(self, key: str, value: object) -> None:
         """
@@ -94,8 +91,7 @@ class HashMap:
 
         bucket.insert(key, value)
         self.size += 1
-
-        
+     
     def remove(self, key: str) -> None:
         """
         Removes given key and associated value;
@@ -115,7 +111,6 @@ class HashMap:
                 return
             prev = node
 
-
     def contains_key(self, key: str) -> bool:
         """
         Returns True if the given key is in the hash map, 
@@ -129,21 +124,18 @@ class HashMap:
                 return True
         return False
 
-
     def empty_buckets(self) -> int:
         """
         Returns no. of empty buckets in Hash Table
         """
         return sum(1 for bucket in self.buckets if not bucket.head)
 
-
     def table_load(self) -> float:
         """
         Returns current load factor
         """
         return float(self.size/(self.capacity))
-    
-    
+        
     def resize_table(self, new_capacity: int) -> None:
         """
         Changes the capacity of the internal hash table.
@@ -162,7 +154,6 @@ class HashMap:
 
         self.capacity = new_capacity
         self.buckets = new_map.buckets
-
 
     def get_keys(self) -> DynamicArray:
         """
