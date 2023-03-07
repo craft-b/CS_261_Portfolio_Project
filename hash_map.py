@@ -55,116 +55,87 @@ class HashMap:
             out += str(i) + ': ' + str(list) + '\n'
         return out
         
+
     def clear(self) -> None:
         """
         Clears Hash Table without changing underlying capacity
         """
-        for i in range(self.buckets.length()):
-            if self.buckets.data[i].size != 0:
-                self.buckets.data[i].head = None
-                self.buckets.data[i].size = 0
+        for bucket in self.buckets.data:
+            bucket.head = None
+            bucket.size = 0
         self.size = 0
         
+
     def get(self, key: str) -> object:
         """
         Returns value associated with given key;
         Returns None if key isn't in Hash Map
         """
-        # Compute the elements bucket
-        hash = self.hash_function(key)
-        index = hash % self.capacity
+        # Compute the element's bucket
+        index = self.hash_function(key) % self.capacity
 
-        ll = self.buckets.data[index]
-
-        for node in ll:
+        for node in self.buckets.data[index]:
             if node.key == key:
                 return node.value
         return None
 
+
     def put(self, key: str, value: object) -> None:
         """
         Updates the key / value pair in the hash map.
-        If a given key already exists in the hash map,
-        its associated value should be replaced with the
-        new value. If a given key is not in the hash map,
-        a key / value pair is be added
         """
+        index = self.hash_function(key) % self.capacity
+        bucket = self.buckets.data[index]
 
-        hash = self.hash_function(key)
-        pos = hash % self.buckets.length()
+        for node in bucket:
+            if node.key == key:
+                node.value = value
+                return
 
-        bucket = self.buckets[pos]
+        bucket.insert(key, value)
+        self.size += 1
 
-        if bucket.head is None:
-            bucket.insert(key, value)
-            self.size += 1
-            return
-
-        elif bucket.contains(key) is not None:
-            target = bucket.contains(key)
-            target.value = value
-
-        else:
-            bucket.insert(key, value)
-            self.size += 1
         
     def remove(self, key: str) -> None:
         """
         Removes given key and associated value;
         Does nothing if key isn't found
         """
-        # Compute the elements bucket
-        hash = self.hash_function(key)
-        index = hash % self.buckets.length()
+        index = self.hash_function(key) % self.capacity
+        bucket = self.buckets.data[index]
 
-        list = self.buckets.get_at_index(index)
-
-        if list.head is None:
-            return None
-
-        prev, cur = None, list.head
-
-        while cur is not None:
-            if cur.key == key:
+        prev = None
+        for node in bucket:
+            if node.key == key:
                 if prev:
-                    prev.next = cur.next
+                    prev.next = node.next
                 else:
-                    list.head = cur.next
+                    bucket.head = node.next
                 self.size -= 1
-            prev, cur = cur, cur.next
+                return
+            prev = node
+
 
     def contains_key(self, key: str) -> bool:
         """
-        Returns True if the given key is in the hash map,
-        otherwise it returns False. An empty hash map does
-        not contain any keys
+        Returns True if the given key is in the hash map, 
+        otherwise False.
         """
-        # Compute the elements bucket
-        hash = self.hash_function(key)
-        index = hash % self.capacity
+        index = self.hash_function(key) % self.capacity
+        bucket = self.buckets.data[index]
 
-        linked_list = self.buckets.data[index] 
-
-        for node in linked_list:
+        for node in bucket:
             if node.key == key:
                 return True
         return False
+
 
     def empty_buckets(self) -> int:
         """
         Returns no. of empty buckets in Hash Table
         """
+        return sum(1 for bucket in self.buckets if not bucket.head)
 
-        count = 0
-
-        for i in range(self.buckets.length()):
-
-            list = self.buckets.get_at_index(i)
-
-            if list.head is None:
-                count += 1
-
-        return count
 
     def table_load(self) -> float:
         """
@@ -172,56 +143,42 @@ class HashMap:
         """
         return float(self.size/(self.capacity))
     
+    
     def resize_table(self, new_capacity: int) -> None:
         """
-        Changes capacity he internal hash table.
+        Changes the capacity of the internal hash table.
         If new_capacity is less than 1, this method does nothing.
         """
         if new_capacity < 1:
             return
 
-        # Create new larger table
-        n_map = HashMap(new_capacity, hash_function_1)
+        new_map = HashMap(new_capacity, self.hash_function)
 
-        # Transfer data from old map to new map
-        for i in range(self.buckets.length()):
+        for bucket in self.buckets:
+            for node in bucket:
+                new_index = node.hash_value % new_capacity
+                new_bucket = new_map.buckets.data[new_index]
+                new_bucket.insert(node.key, node.value)
 
-            list = self.buckets.get_at_index(i)
-            cur = list.head
+        self.capacity = new_capacity
+        self.buckets = new_map.buckets
 
-            while cur is not None:
-                hash = self.hash_function(cur.key)
-                pos = hash % n_map.buckets.length()
-                transfer = n_map.buckets[pos]
-                transfer.insert(cur.key, cur.value)
-                cur = cur.next
-
-        self.capacity = n_map.capacity
-        self.buckets = n_map.buckets
 
     def get_keys(self) -> DynamicArray:
         """
-        Returns Dynamic Array that contains
-        all of stored keys in the Hash Map
+        Returns a Dynamic Array containing all of the 
+        keys in the hash map.
         """
-        # create empty DA
-        da_keys = DynamicArray()
+        keys = DynamicArray()
 
-        # Starting at beginning of DA, Traverse buckets
-        for i in range(self.buckets.length()):
+        for bucket in self.buckets:
+            node = bucket.head
+            while node is not None:
+                keys.append(node.key)
+                node = node.next
 
-            # If bucket has linked list, traverse LL for keys - 
-            # starting at head until end of linked list
+        return keys
 
-            da_ll = self.buckets.get_at_index(i)
-            da_ll_head = da_ll.head
-
-            while da_ll_head is not None:
-                da_keys.append(da_ll_head.key)
-                da_ll_head = da_ll_head.next
-
-        # When end of old array reached, return new DA
-        return da_keys
 
 
 
